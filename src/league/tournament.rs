@@ -2,7 +2,7 @@ extern crate rand;
 
 use super::player::Player;
 use super::game::Game;
-use rand::{thread_rng, Rng};
+use super::game::NUMBER_PLAYER_PER_GAME;
 
 pub struct Tournament {
     players: Vec<Player>
@@ -19,29 +19,31 @@ impl Tournament {
     }
 
     pub fn create_games(&self) -> Vec<Game> {
-        let players = self.shuffle_players();
-        let chunks = players.chunks(4);
+        let players = self.players.shuffle();
+        let chunks = players.chunks(NUMBER_PLAYER_PER_GAME);
         let mut games: Vec<Game> = vec![];
+        let mut remainders: Vec<Player> = vec![];
 
         for chunk in chunks {
-            games.push(Game::new(chunk));
+            if chunk.len() == NUMBER_PLAYER_PER_GAME {
+                games.push(
+                    Game::new([
+                        chunk[0].clone(),
+                        chunk[1].clone(),
+                        chunk[2].clone(),
+                        chunk[3].clone()
+                    ])
+                );
+            } else {
+                for player in chunk {
+                    remainders.push(player);
+                }
+            }
         }
 
         games
     }
 
-    fn shuffle_players(&self) -> Vec<Player> {
-        let mut players = self.players.clone().into_boxed_slice();
-        let mut rng = thread_rng();
-        rng.shuffle(&mut players);
-
-        let mut vector_players: Vec<Player> = vec![];
-        for player in players.into_iter() {
-            vector_players.push(player.clone());
-        }
-
-        vector_players
-    }
 }
 
 pub struct TournamentBuilder {

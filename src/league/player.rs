@@ -1,3 +1,6 @@
+
+use rand::{thread_rng, Rng};
+
 #[derive(Debug)]
 pub struct Player {
     pub name: String
@@ -8,6 +11,21 @@ impl Player {
         Player {
             name: player_name
         }
+    }
+}
+
+impl Vec<Player> {
+    pub fn shuffle(&self) -> Vec<Player> {
+        let mut players = self.clone().into_boxed_slice();
+        let mut rng = thread_rng();
+        rng.shuffle(&mut players);
+
+        let mut vector_players: Vec<Player> = vec![];
+        for player in players.into_iter() {
+            vector_players.push(player.clone());
+        }
+
+        vector_players
     }
 }
 
