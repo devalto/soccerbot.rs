@@ -14,8 +14,20 @@ impl Player {
     }
 }
 
-impl Vec<Player> {
-    pub fn shuffle(&self) -> Vec<Player> {
+impl Clone for Player {
+    fn clone(&self) -> Player {
+        Player {
+            name: self.name.clone()
+        }
+    }
+}
+
+pub trait Shuffle {
+    fn shuffle(&self) -> Self;
+}
+
+impl Shuffle for Vec<Player> {
+    fn shuffle(&self) -> Vec<Player> {
         let mut players = self.clone().into_boxed_slice();
         let mut rng = thread_rng();
         rng.shuffle(&mut players);
@@ -29,18 +41,11 @@ impl Vec<Player> {
     }
 }
 
-impl Clone for Player {
-    fn clone(&self) -> Player {
-        Player {
-            name: self.name.clone()
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
 
     use super::Player;
+    use super::Shuffle;
 
     #[test]
     fn test_create_player_with_name() {
@@ -58,6 +63,18 @@ mod tests {
         let cloned = player.clone();
 
         assert_eq!("name".to_string(), cloned.name);
+    }
+
+    #[test]
+    fn test_shuffle() {
+        let players: Vec<Player> = vec![
+            Player::new("player name".to_string()),
+            Player::new("player name 2".to_string())
+        ];
+
+        let shuff: Vec<Player> = players.shuffle();
+
+        return
     }
 
 }

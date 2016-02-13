@@ -1,5 +1,6 @@
 extern crate rand;
 
+use super::player::Shuffle;
 use super::player::Player;
 use super::game::Game;
 use super::game::NUMBER_PLAYER_PER_GAME;
@@ -20,12 +21,14 @@ impl Tournament {
 
     pub fn create_games(&self) -> Vec<Game> {
         let players = self.players.shuffle();
-        let chunks = players.chunks(NUMBER_PLAYER_PER_GAME);
+        let chunks = players.chunks(NUMBER_PLAYER_PER_GAME as usize);
         let mut games: Vec<Game> = vec![];
         let mut remainders: Vec<Player> = vec![];
+        let mut playing: Vec<Player> = vec![];
+
 
         for chunk in chunks {
-            if chunk.len() == NUMBER_PLAYER_PER_GAME {
+            if chunk.len() == NUMBER_PLAYER_PER_GAME as usize {
                 games.push(
                     Game::new([
                         chunk[0].clone(),
@@ -34,11 +37,33 @@ impl Tournament {
                         chunk[3].clone()
                     ])
                 );
+                playing.push(chunk[0].clone());
+                playing.push(chunk[1].clone());
+                playing.push(chunk[2].clone());
+                playing.push(chunk[3].clone());
             } else {
                 for player in chunk {
-                    remainders.push(player);
+                    remainders.push(player.clone());
                 }
             }
+        }
+
+        // If remainders is not empty, complete the set to fit inside
+        // a game and push a new game in the array.
+        if 0 < remainders.len() {
+            let reshuffle_playing = playing.shuffle();
+            let missing_player_count = NUMBER_PLAYER_PER_GAME as usize - remainders.len();
+            for x in 0..missing_player_count {
+                remainders.push(reshuffle_playing[x].clone());
+            }
+            games.push(
+                Game::new([
+                    remainders[0].clone(),
+                    remainders[1].clone(),
+                    remainders[2].clone(),
+                    remainders[3].clone()
+                ])
+            );
         }
 
         games
@@ -119,14 +144,17 @@ mod tests {
     }
 
     #[test]
-    fn test_jambon() {
+    fn test_create_games_with_remainders_complete() {
         let t = TournamentBuilder::new()
             .add("sylvain")
             .add("sarah")
             .add("mathieu")
             .add("cedric")
             .add("christian")
+            .add("eugénie")
             .finalize();
-        t.create_games();
+        let games = t.create_games();
+
+        assert_eq!(2, games.len());
     }
 }
