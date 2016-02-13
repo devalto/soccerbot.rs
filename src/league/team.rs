@@ -1,5 +1,6 @@
 use super::player::Player;
 
+#[derive(Debug)]
 pub struct Team {
     pub attack: Player,
     pub defense: Player

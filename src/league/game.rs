@@ -3,6 +3,7 @@ use super::player::Player;
 
 pub const NUMBER_PLAYER_PER_GAME: u32 = 4;
 
+#[derive(Debug)]
 pub struct Game {
     pub red: Team,
     pub blue: Team
