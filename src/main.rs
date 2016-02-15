@@ -3,20 +3,21 @@ extern crate rand;
 pub mod league;
 
 use league::tournament::TournamentBuilder;
+use std::io;
 
 fn main() {
-    let tournament = TournamentBuilder::new()
-        .add("sylvain")
-        .add("sarah")
-        .add("mathieu")
-        .add("cédric")
-        .add("christian")
-        .add("alexandre")
-        .add("stéphane")
-        .add("françois")
-        .add("yannick")
-        .add("eugénie")
-        .finalize();
+    let mut builder = TournamentBuilder::new();
+
+    let mut input = String::new();
+    let stdin = io::stdin();
+
+    while stdin.read_line(&mut input).unwrap() > 0 {
+        builder.add(&input.trim());
+
+        input.clear();
+    }
+
+    let tournament = builder.finalize();
 
     let games = tournament.create_games();
     let mut game_counter = 1;
