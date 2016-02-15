@@ -20,9 +20,14 @@ impl Tournament {
     }
 
     pub fn create_games(&self) -> Vec<Game> {
+        let mut games: Vec<Game> = vec![];
+
+        if self.players.len() < NUMBER_PLAYER_PER_GAME as usize {
+            return games;
+        }
+
         let players = self.players.shuffle();
         let chunks = players.chunks(NUMBER_PLAYER_PER_GAME as usize);
-        let mut games: Vec<Game> = vec![];
         let mut remainders: Vec<Player> = vec![];
         let mut playing: Vec<Player> = vec![];
 
@@ -156,5 +161,17 @@ mod tests {
         let games = t.create_games();
 
         assert_eq!(2, games.len());
+    }
+
+    #[test]
+    fn test_create_games_with_not_enough_players() {
+        let t = TournamentBuilder::new()
+            .add("sylvain")
+            .add("sarah")
+            .add("mathieu")
+            .finalize();
+        let games = t.create_games();
+
+        assert_eq!(0, games.len());
     }
 }
