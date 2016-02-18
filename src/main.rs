@@ -1,6 +1,7 @@
 extern crate rand;
 
 pub mod league;
+pub mod bot;
 
 use league::tournament::TournamentBuilder;
 use std::io;
