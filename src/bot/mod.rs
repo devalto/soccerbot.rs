@@ -135,3 +135,99 @@ impl slack::EventHandler for SoccerBotHandler {
         // let _ = cli.set_topic("#general", "bots rule!");
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::SoccerBotHandler;
+    use super::slack;
+
+    #[test]
+    fn test_get_message_text_from_result_with_ok_result() {
+        let e = slack::Event::Message(slack::Message::Standard {
+            ts: "date".to_string(),
+            channel: Some("#channel".to_string()),
+            user: Some("user".to_string()),
+            text: Some("a text message".to_string()),
+            is_starred: Some(true),
+            pinned_to: None,
+            reactions: None,
+            edited: None,
+            attachments: None
+        });
+        let r: Result<_, slack::error::Error> = Ok(&e);
+
+        let mut handler = SoccerBotHandler;
+        let m = handler.get_message_text_from_result(r).unwrap();
+
+        assert_eq!(m.text, "a text message");
+        assert_eq!(m.channel, "#channel");
+    }
+
+    #[test]
+    fn test_get_message_text_from_event_with_any_other_event_returns_null() {
+        let e = slack::Event::Hello;
+
+        let mut handler = SoccerBotHandler;
+        let m = handler.get_message_text_from_event(&e);
+
+        assert_eq!(m.is_none(), true);
+    }
+
+    #[test]
+    fn test_get_message_text_from_event_with_message_event() {
+        let e = slack::Event::Message(slack::Message::Standard {
+            ts: "date".to_string(),
+            channel: Some("#channel".to_string()),
+            user: Some("user".to_string()),
+            text: Some("a text message".to_string()),
+            is_starred: Some(true),
+            pinned_to: None,
+            reactions: None,
+            edited: None,
+            attachments: None
+        });
+
+        let mut handler = SoccerBotHandler;
+        let m = handler.get_message_text_from_event(&e).unwrap();
+
+        assert_eq!(m.text, "a text message");
+        assert_eq!(m.channel, "#channel");
+    }
+
+    #[test]
+    fn test_get_message_text_from_message_enum_with_user_normal_message() {
+        let mut handler = SoccerBotHandler;
+        let msg = slack::Message::Standard {
+            ts: "date".to_string(),
+            channel: Some("#channel".to_string()),
+            user: Some("user".to_string()),
+            text: Some("a text message".to_string()),
+            is_starred: Some(true),
+            pinned_to: None,
+            reactions: None,
+            edited: None,
+            attachments: None
+        };
+
+        let m = handler.get_message_text_from_message_enum(&msg).unwrap();
+
+        assert_eq!(m.text, "a text message");
+        assert_eq!(m.channel, "#channel");
+    }
+
+    #[test]
+    fn test_get_message_text_from_message_enum_with_other_message() {
+        let mut handler = SoccerBotHandler;
+        let msg = slack::Message::MeMessage {
+            ts: "date".to_string(),
+            channel: "#channel".to_string(),
+            user: "user".to_string(),
+            text: "a text message".to_string()
+        };
+
+        let m = handler.get_message_text_from_message_enum(&msg);
+
+        assert_eq!(m.is_none(), true);
+    }
+}

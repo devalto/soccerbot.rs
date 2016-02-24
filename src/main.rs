@@ -11,7 +11,7 @@ fn main() {
     let key = "SLACK_TOKEN";
     let token = match env::var(key) {
         Ok(val) => val,
-        Err(e) => {
+        Err(_) => {
             println!("SLACK_TOKEN environment variable must be set");
             return
         }
