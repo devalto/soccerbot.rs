@@ -2,51 +2,60 @@ extern crate slack;
 extern crate regex;
 
 use league;
+use self::slack::error::Error;
+
+struct Message {
+    text: String,
+    channel: String
+}
 
 pub struct SoccerBot {
     api_key: String
 }
 
 impl SoccerBot {
-    fn new(api_key: String) -> SoccerBot {
+    pub fn new(api_key: String) -> SoccerBot {
         SoccerBot { api_key: api_key }
     }
 
-    fn start() {
+    pub fn start(&self) -> Result<(), Error> {
+        let mut handler = SoccerBotHandler;
+        let mut cli = slack::RtmClient::new(&self.api_key);
 
+        cli.login_and_run::<SoccerBotHandler>(&mut handler)
     }
 }
 
 struct SoccerBotHandler;
 
 impl SoccerBotHandler {
-    fn get_message_text_from_result(&mut self, event: Result<&slack::Event, slack::Error>) -> Option<String> {
+    fn get_message_text_from_result(&mut self, event: Result<&slack::Event, slack::Error>) -> Option<Message> {
         match event {
             Ok(event) => self.get_message_text_from_event(&event),
             _ => None
         }
     }
 
-    fn get_message_text_from_event(&mut self, event: &slack::Event) -> Option<String> {
+    fn get_message_text_from_event(&mut self, event: &slack::Event) -> Option<Message> {
         match event {
-            &slack::Event::Message(m) => self.get_message_text_from_message_enum(m),
+            &slack::Event::Message(ref m) => self.get_message_text_from_message_enum(m),
             _ => None
         }
     }
 
-    fn get_message_text_from_message_enum(&mut self, message: slack::Message) -> Option<String> {
+    fn get_message_text_from_message_enum(&mut self, message: &slack::Message) -> Option<Message> {
         match message {
-            slack::Message::Standard {
-                text: text,
+            &slack::Message::Standard {
+                text: ref text,
                 ts: _,
-                channel: _,
+                channel: ref channel,
                 user: _,
                 is_starred: _,
                 pinned_to: _,
                 reactions: _,
                 edited: _,
                 attachments: _
-            } => Some(text.unwrap()),
+            } => Some(Message { channel: channel.clone().unwrap(), text: text.clone().unwrap() }),
             _ => None
         }
     }
@@ -55,10 +64,12 @@ impl SoccerBotHandler {
 impl slack::EventHandler for SoccerBotHandler {
     fn on_event(&mut self, cli: &mut slack::RtmClient, event: Result<&slack::Event, slack::Error>, raw_json: &str) {
         let t = self.get_message_text_from_result(event);
-        let text = match t {
-            Some(t) => t,
+        let message = match t {
+            Some(m) => m,
             _ => return
         };
+
+        let text = message.text;
 
         let re = regex::Regex::new(r"^team-generator-4").unwrap();
         let (s,_) = re.find(&text.to_string()).unwrap();
@@ -73,24 +84,24 @@ impl slack::EventHandler for SoccerBotHandler {
             let t = builder.finalize();
             let games = t.create_games();
 
-            let output = String::new();
+            let mut output = String::new();
             let mut game_counter = 1;
             for game in games {
-                output.push_str(format!("Game {}\n", game_counter).to_string());
-                output.push_str(format!("------\n"));
-                output.push_str(format!("\n"));
-                output.push_str(format!("Red team\n"));
-                output.push_str(format!("Attack: {}\n", game.red.attack.name));
-                output.push_str(format!("Defense: {}\n", game.red.defense.name));
-                output.push_str(format!("\n"));
-                output.push_str(format!("Blue team\n"));
-                output.push_str(format!("Attack: {}\n", game.blue.attack.name));
-                output.push_str(format!("Defense: {}\n", game.blue.defense.name));
-                output.push_str(format!("\n"));
+                output.push_str(&format!("Game {}\n", game_counter)[..]);
+                output.push_str(&format!("------\n")[..]);
+                output.push_str(&format!("\n")[..]);
+                output.push_str(&format!("Red team\n")[..]);
+                output.push_str(&format!("Attack: {}\n", game.red.attack.name)[..]);
+                output.push_str(&format!("Defense: {}\n", game.red.defense.name)[..]);
+                output.push_str(&format!("\n")[..]);
+                output.push_str(&format!("Blue team\n")[..]);
+                output.push_str(&format!("Attack: {}\n", game.blue.attack.name)[..]);
+                output.push_str(&format!("Defense: {}\n", game.blue.defense.name)[..]);
+                output.push_str(&format!("\n")[..]);
                 game_counter = game_counter + 1;
             }
 
-            cli.send_message("random", output);
+            let _ = cli.send_message(&message.channel[..], &output[..]);
         }
 
     }
