@@ -72,7 +72,12 @@ impl slack::EventHandler for SoccerBotHandler {
         let text = message.text;
 
         let re = regex::Regex::new(r"^team-generator-4").unwrap();
-        let (s,_) = re.find(&text.to_string()).unwrap();
+        let r = re.find(&text.to_string());
+
+        let s = match r {
+            None => return,
+            Some((s, _)) => s
+        };
 
         // We have a match !
         if s == 0 {
@@ -83,6 +88,11 @@ impl slack::EventHandler for SoccerBotHandler {
             }
             let t = builder.finalize();
             let games = t.create_games();
+
+            if games.len() == 0 {
+                let _ = cli.send_message(&message.channel[..], "No games can be generated...");
+                return
+            }
 
             let mut output = String::new();
             let mut game_counter = 1;
