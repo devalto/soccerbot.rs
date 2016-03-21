@@ -1,0 +1,8 @@
+FROM debian:jessie
+
+ADD soccerbot /usr/bin/soccerbot
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -y install libssl1.0.0
+
+CMD /usr/bin/soccerbot
