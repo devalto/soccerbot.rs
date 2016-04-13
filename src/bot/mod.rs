@@ -71,7 +71,7 @@ impl slack::EventHandler for SoccerBotHandler {
 
         let text = message.text;
 
-        let re = regex::Regex::new(r"^team-generator-4").unwrap();
+        let re = regex::Regex::new(r"^team-of-4").unwrap();
         let r = re.find(&text.to_string());
 
         let s = match r {
@@ -90,23 +90,20 @@ impl slack::EventHandler for SoccerBotHandler {
             let games = t.create_games();
 
             if games.len() == 0 {
-                let _ = cli.send_message(&message.channel[..], "No games can be generated...");
+                let _ = cli.send_message(&message.channel[..], "Not enough players to generate games of 4 players...");
                 return
             }
 
             let mut output = String::new();
             let mut game_counter = 1;
             for game in games {
-                output.push_str(&format!("Game {}\n", game_counter)[..]);
-                output.push_str(&format!("------\n")[..]);
-                output.push_str(&format!("\n")[..]);
-                output.push_str(&format!("Red team\n")[..]);
-                output.push_str(&format!("Attack: {}\n", game.red.attack.name)[..]);
-                output.push_str(&format!("Defense: {}\n", game.red.defense.name)[..]);
-                output.push_str(&format!("\n")[..]);
-                output.push_str(&format!("Blue team\n")[..]);
-                output.push_str(&format!("Attack: {}\n", game.blue.attack.name)[..]);
-                output.push_str(&format!("Defense: {}\n", game.blue.defense.name)[..]);
+                if game_counter > 1 {
+                    output.push_str(&format!("----\n")[..]);
+                }
+                output.push_str(&format!(":red_circle: :{}: {} (A)\n", game.red.attack.name, game.red.attack.name)[..]);
+                output.push_str(&format!(":red_circle: :{}: {} (D)\n", game.red.defense.name, game.red.defense.name)[..]);
+                output.push_str(&format!(":large_blue_circle: :{}: {} (A)\n", game.blue.attack.name, game.blue.attack.name)[..]);
+                output.push_str(&format!(":large_blue_circle: :{}: {} (D)\n", game.blue.defense.name, game.blue.defense.name)[..]);
                 output.push_str(&format!("\n")[..]);
                 game_counter = game_counter + 1;
             }
