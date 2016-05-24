@@ -100,10 +100,10 @@ impl slack::EventHandler for SoccerBotHandler {
                 if game_counter > 1 {
                     output.push_str(&format!("----\n")[..]);
                 }
-                output.push_str(&format!(":red_circle: :{}: {} (A)\n", game.red.attack.name, game.red.attack.name)[..]);
-                output.push_str(&format!(":red_circle: :{}: {} (D)\n", game.red.defense.name, game.red.defense.name)[..]);
                 output.push_str(&format!(":large_blue_circle: :{}: {} (A)\n", game.blue.attack.name, game.blue.attack.name)[..]);
                 output.push_str(&format!(":large_blue_circle: :{}: {} (D)\n", game.blue.defense.name, game.blue.defense.name)[..]);
+                output.push_str(&format!(":red_circle: :{}: {} (A)\n", game.red.attack.name, game.red.attack.name)[..]);
+                output.push_str(&format!(":red_circle: :{}: {} (D)\n", game.red.defense.name, game.red.defense.name)[..]);
                 output.push_str(&format!("\n")[..]);
                 game_counter = game_counter + 1;
             }
