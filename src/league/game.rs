@@ -1,20 +1,20 @@
-use super::team::Team;
+use super::team::TeamOfTwo;
 use super::player::Player;
 
 pub const NUMBER_PLAYER_PER_GAME: u32 = 4;
 
 #[derive(Debug)]
 pub struct Game {
-    pub red: Team,
-    pub blue: Team
+    pub red: TeamOfTwo,
+    pub blue: TeamOfTwo
 }
 
 impl Game {
     pub fn new(players: [Player; 4]) -> Self {
         let mut vec_players = players.to_vec();
         Game {
-            red: Team::new(&mut vec_players),
-            blue: Team::new(&mut vec_players)
+            red: TeamOfTwo::new(&mut vec_players),
+            blue: TeamOfTwo::new(&mut vec_players)
         }
     }
 }

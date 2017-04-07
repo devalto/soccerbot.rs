@@ -1,16 +1,28 @@
 use super::player::Player;
 
 #[derive(Debug)]
-pub struct Team {
+pub struct TeamOfTwo {
     pub attack: Player,
     pub defense: Player
 }
 
-impl Team {
-    pub fn new(players: &mut Vec<Player>) -> Team {
-        Team {
+impl TeamOfTwo {
+    pub fn new(players: &mut Vec<Player>) -> TeamOfTwo {
+        TeamOfTwo {
             attack: players.pop().unwrap(),
             defense: players.pop().unwrap()
+        }
+    }
+}
+
+pub struct TeamOfOne {
+    pub player: Player
+}
+
+impl TeamOfOne {
+    pub fn new(players: &mut Vec<Player>) -> TeamOfOne {
+        TeamOfOne {
+            player: players.pop().unwrap()
         }
     }
 }
@@ -18,7 +30,7 @@ impl Team {
 #[cfg(test)]
 mod tests {
 
-    use super::Team;
+    use super::TeamOfTwo;
     use super::super::player::Player;
 
     #[test]
@@ -29,7 +41,7 @@ mod tests {
             Player::new("player 3".to_string())
         ];
 
-        let team = Team::new(&mut players);
+        let team = TeamOfTwo::new(&mut players);
 
         assert_eq!("player 3".to_string(), team.attack.name);
         assert_eq!("player 2".to_string(), team.defense.name);
